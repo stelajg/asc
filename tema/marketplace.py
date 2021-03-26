@@ -12,6 +12,7 @@ class Marketplace:
     Class that represents the Marketplace. It's the central part of the implementation.
     The producers and consumers use its methods concurrently.
     """
+
     def __init__(self, queue_size_per_producer):
         """
         Constructor
@@ -19,13 +20,20 @@ class Marketplace:
         :type queue_size_per_producer: Int
         :param queue_size_per_producer: the maximum size of a queue associated with each producer
         """
-        pass
+        self.queue_size_per_producer = queue_size_per_producer
+        self.id_producer = 0
+        self.id_carts = 0
+        self.producers_list = []
+        self.market_contains = []
+        self.carts_contains = []
 
     def register_producer(self):
         """
         Returns an id for the producer that calls this.
         """
-        pass
+        self.id_producer += 1
+        self.producers_list.append(self.queue_size_per_producer)
+        return self.id_producer
 
     def publish(self, producer_id, product):
         """
@@ -39,7 +47,12 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again.
         """
-        pass
+        if self.producers_list[producer_id] is not 0:
+            self.market_contains[producer_id].append([product, True])
+            self.producers_list[producer_id] -= 1
+            return True
+        else:
+            return False
 
     def new_cart(self):
         """
@@ -47,7 +60,8 @@ class Marketplace:
 
         :returns an int representing the cart_id
         """
-        pass
+        self.id_carts += 1
+        return self.id_carts
 
     def add_to_cart(self, cart_id, product):
         """
@@ -61,7 +75,15 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again
         """
-        pass
+
+        # for lists in self.market_contains:
+        #     for sublist in lists:
+        #         for item in sublist:
+        #             if item[0] is product and item[1] is True:
+        #                 self.carts_contains[cart_id].append(product)
+        #                 item[1] = False
+        #                 return True
+        # return False
 
     def remove_from_cart(self, cart_id, product):
         """
@@ -72,8 +94,15 @@ class Marketplace:
 
         :type product: Product
         :param product: the product to remove from cart
+
         """
-        pass
+        self.carts_contains[cart_id].remove(product)
+        # for lists in self.market_contains:
+        #     for sublist in lists:
+        #         for item in sublist:
+        #             if item[0] is product and item[1] is False:
+        #                 self.carts_contains[cart_id].append(product)
+        #                 item[1] = True
 
     def place_order(self, cart_id):
         """
@@ -82,4 +111,4 @@ class Marketplace:
         :type cart_id: Int
         :param cart_id: id cart
         """
-        pass
+        return self.carts_contains[cart_id]

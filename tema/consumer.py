@@ -1,6 +1,5 @@
 """
 This module represents the Consumer.
-hello, i want to add to git
 Computer Systems Architecture Course
 Assignment 1
 March 2021
@@ -31,7 +30,12 @@ class Consumer(Thread):
         :type kwargs:
         :param kwargs: other arguments that are passed to the Thread's __init__()
         """
-        pass
+        super().__init__()
+        self.carts = carts
+        self.marketplace = marketplace
+        self.retry_wait_time = retry_wait_time
+        self.kwargs = kwargs
 
     def run(self):
-        pass
+        while True:
+            print(self.carts)
