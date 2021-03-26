@@ -52,10 +52,9 @@ class Marketplace:
         :returns True or False. If the caller receives False, it should wait and then try again.
         """
         if self.producers_list[producer_id] != 0:
+            self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
-
-            self.wait_condition_for_producing_prod.acquire()
             time.sleep(wait_time)
             self.wait_condition_for_producing_prod.release()
             return True
