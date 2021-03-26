@@ -37,5 +37,14 @@ class Producer(Thread):
         self.republish_wait_time = republish_wait_time
         self.kwargs = kwargs
 
+    def helper_run(self, producer_id, command_info):
+        for i in range(command_info[1]):
+            print(command_info[0])
+            self.marketplace.publish(producer_id, command_info[0], command_info[2])
+
+
     def run(self):
-        pass
+        id = self.marketplace.register_producer()
+        print(self.products)
+        for i in self.products:
+            self.helper_run(id, i)

@@ -47,12 +47,8 @@ class Consumer(Thread):
         pass
 
     def run(self):
-        print(self.carts)
-        # aux = self.carts[0][0]
-        # aux1 = aux.items()
-        # print(self.carts[0][0].get('type'))
-        # print(list(self.carts[0][0].keys())[0])
-        print(self.kwargs)
+        # print(self.carts)
+        # print(self.kwargs)
         for i in self.carts[0]:
             command = i.get('type')
             if command == 'add':

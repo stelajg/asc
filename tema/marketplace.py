@@ -5,6 +5,8 @@ Computer Systems Architecture Course
 Assignment 1
 March 2021
 """
+import time
+from threading import Condition
 
 
 class Marketplace:
@@ -21,21 +23,23 @@ class Marketplace:
         :param queue_size_per_producer: the maximum size of a queue associated with each producer
         """
         self.queue_size_per_producer = queue_size_per_producer
-        self.id_producer = 0
+        self.id_producer = -1
         self.id_carts = 0
         self.producers_list = []
         self.market_contains = []
         self.carts_contains = []
+        self.wait_condition_for_producing_prod = Condition()
 
     def register_producer(self):
         """
         Returns an id for the producer that calls this.
         """
         self.id_producer += 1
+        self.market_contains.append([])
         self.producers_list.append(self.queue_size_per_producer)
         return self.id_producer
 
-    def publish(self, producer_id, product):
+    def publish(self, producer_id, product, wait_time):
         """
         Adds the product provided by the producer to the marketplace
 
@@ -50,6 +54,10 @@ class Marketplace:
         if self.producers_list[producer_id] != 0:
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
+
+            self.wait_condition_for_producing_prod.acquire()
+            time.sleep(wait_time)
+            self.wait_condition_for_producing_prod.release()
             return True
         else:
             return False
