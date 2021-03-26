@@ -36,6 +36,28 @@ class Consumer(Thread):
         self.retry_wait_time = retry_wait_time
         self.kwargs = kwargs
 
+    @staticmethod
+    def add_command(product, quantity):
+        print("i am in add", product, quantity)
+        pass
+
+    @staticmethod
+    def remove_command(product, quantity):
+        print("i am in remove", product, quantity)
+        pass
+
     def run(self):
-        while True:
-            print(self.carts)
+        print(self.carts)
+        # aux = self.carts[0][0]
+        # aux1 = aux.items()
+        # print(self.carts[0][0].get('type'))
+        # print(list(self.carts[0][0].keys())[0])
+        print(self.kwargs)
+        for i in self.carts[0]:
+            command = i.get('type')
+            if command == 'add':
+                self.add_command(i.get('product'), i.get('quantity'))
+            else:
+                self.remove_command(i.get('product'), i.get('quantity'))
+
+

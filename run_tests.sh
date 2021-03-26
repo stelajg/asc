@@ -15,7 +15,7 @@ do
 done
 
 # Cleanup the previous run's temporary files
-rm -f ${TESTS}/*.out.sorted
+#rm -f ${TESTS}/*.out.sorted
 
 # Run tests
 for i in {1..10}

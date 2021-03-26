@@ -47,7 +47,7 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again.
         """
-        if self.producers_list[producer_id] is not 0:
+        if self.producers_list[producer_id] != 0:
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
             return True
@@ -76,14 +76,14 @@ class Marketplace:
         :returns True or False. If the caller receives False, it should wait and then try again
         """
 
-        # for lists in self.market_contains:
-        #     for sublist in lists:
-        #         for item in sublist:
-        #             if item[0] is product and item[1] is True:
-        #                 self.carts_contains[cart_id].append(product)
-        #                 item[1] = False
-        #                 return True
-        # return False
+        for lists in self.market_contains:
+            for sublist in lists:
+                for item in sublist:
+                    if item[0] is product and item[1] is True:
+                        self.carts_contains[cart_id].append(product)
+                        item[1] = False
+                        return True
+        return False
 
     def remove_from_cart(self, cart_id, product):
         """
@@ -97,12 +97,12 @@ class Marketplace:
 
         """
         self.carts_contains[cart_id].remove(product)
-        # for lists in self.market_contains:
-        #     for sublist in lists:
-        #         for item in sublist:
-        #             if item[0] is product and item[1] is False:
-        #                 self.carts_contains[cart_id].append(product)
-        #                 item[1] = True
+        for lists in self.market_contains:
+            for sublist in lists:
+                for item in sublist:
+                    if item[0] is product and item[1] is False:
+                        self.carts_contains[cart_id].append(product)
+                        item[1] = True
 
     def place_order(self, cart_id):
         """

@@ -38,5 +38,4 @@ class Producer(Thread):
         self.kwargs = kwargs
 
     def run(self):
-        while True:
-            print(self.kwargs)
+        pass
