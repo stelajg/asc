@@ -5,7 +5,7 @@ Assignment 1
 March 2021
 """
 import time
-from threading import Thread
+from threading import Thread, Lock
 
 
 class Consumer(Thread):

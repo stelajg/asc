@@ -6,7 +6,7 @@ Assignment 1
 March 2021
 """
 import time
-from threading import Condition, Lock
+from threading import Condition, Lock, Semaphore, RLock
 
 
 class Marketplace:
@@ -29,8 +29,10 @@ class Marketplace:
         self.market_contains = []
         self.carts_contains = []
         self.wait_condition_for_producing_prod = Condition()
-        self.lock_producers = Lock()
+        self.lock_producers = RLock()
+        self.lock_consumers = RLock()
         self.number_of_orders_placed = -1
+        self.consumersSemaphore = Semaphore(0)
 
     def register_producer(self):
         """
@@ -55,12 +57,14 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again.
         """
+
         if self.producers_list[producer_id] != 0:
-            self.wait_condition_for_producing_prod.acquire()
+            #self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
             time.sleep(wait_time)
-            self.wait_condition_for_producing_prod.release()
+            #self.wait_condition_for_producing_prod.release()
+            self.consumersSemaphore.release()
             return True
         else:
             return False
@@ -71,8 +75,10 @@ class Marketplace:
 
         :returns an int representing the cart_id
         """
+        self.lock_consumers.acquire()
         self.id_carts += 1
         self.carts_contains.append([])
+        self.lock_consumers.release()
         return self.id_carts
 
     def add_to_cart(self, cart_id, product):
@@ -87,6 +93,7 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again
         """
+        self.consumersSemaphore.acquire()
         for lists in self.market_contains:
             for item in lists:
                 if item[0] is product and item[1] is True:
@@ -113,6 +120,7 @@ class Marketplace:
                 if item[0] is product and item[1] is False:
                     self.producers_list[self.market_contains.index(lists)] -= 1
                     item[1] = True
+        self.consumersSemaphore.release()
 
     def place_order(self, cart_id):
         """
