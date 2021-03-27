@@ -44,6 +44,8 @@ class Producer(Thread):
 
     def run(self):
         id_prod = self.marketplace.register_producer()
-        while True:
+        time_to_run = True
+        while time_to_run:
             for i in self.products:
                 self.helper_run(id_prod, i)
+            time_to_run = self.marketplace.number_of_orders()

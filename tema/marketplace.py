@@ -30,6 +30,7 @@ class Marketplace:
         self.carts_contains = []
         self.wait_condition_for_producing_prod = Condition()
         self.lock_producers = Lock()
+        self.number_of_orders_placed = -1
 
     def register_producer(self):
         """
@@ -120,4 +121,10 @@ class Marketplace:
         :type cart_id: Int
         :param cart_id: id cart
         """
+        self.number_of_orders_placed += 1
         return self.carts_contains[cart_id]
+
+    def number_of_orders(self):
+        if self.number_of_orders_placed == self.id_carts:
+            return False
+        return True
