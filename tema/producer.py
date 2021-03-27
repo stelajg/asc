@@ -42,7 +42,6 @@ class Producer(Thread):
             print(command_info[0])
             self.marketplace.publish(producer_id, command_info[0], command_info[2])
 
-
     def run(self):
         id = self.marketplace.register_producer()
         print(self.products)

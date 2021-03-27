@@ -6,7 +6,7 @@ Assignment 1
 March 2021
 """
 import time
-from threading import Condition
+from threading import Condition, Lock
 
 
 class Marketplace:
@@ -29,14 +29,17 @@ class Marketplace:
         self.market_contains = []
         self.carts_contains = []
         self.wait_condition_for_producing_prod = Condition()
+        self.lock_producers = Lock()
 
     def register_producer(self):
         """
         Returns an id for the producer that calls this.
         """
+        self.lock_producers.acquire()
         self.id_producer += 1
         self.market_contains.append([])
         self.producers_list.append(self.queue_size_per_producer)
+        self.lock_producers.release()
         return self.id_producer
 
     def publish(self, producer_id, product, wait_time):
