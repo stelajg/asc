@@ -37,13 +37,12 @@ class Consumer(Thread):
         self.kwargs = kwargs
 
     def add_command(self, id_cart, product, quantity):
-        status = False
         for i in range(quantity):
+            status = False
             while not status:
                 status = self.marketplace.add_to_cart(id_cart, product)
                 if not status:
                     time.sleep(self.retry_wait_time)
-            status = False
 
     def remove_command(self, id_cart, product, quantity):
         for i in range(quantity):

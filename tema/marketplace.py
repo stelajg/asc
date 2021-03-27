@@ -59,12 +59,12 @@ class Marketplace:
         """
 
         if self.producers_list[producer_id] != 0:
-            #self.wait_condition_for_producing_prod.acquire()
+            self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
-            time.sleep(wait_time)
-            #self.wait_condition_for_producing_prod.release()
             self.consumersSemaphore.release()
+            self.wait_condition_for_producing_prod.release()
+            time.sleep(wait_time)
             return True
         else:
             return False

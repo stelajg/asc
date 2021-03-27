@@ -39,8 +39,11 @@ class Producer(Thread):
 
     def helper_run(self, producer_id, command_info):
         for i in range(command_info[1]):
-            self.marketplace.publish(producer_id, command_info[0], command_info[2])
-            time.sleep(self.republish_wait_time)
+            status = False
+            while not status:
+                status = self.marketplace.publish(producer_id, command_info[0], command_info[2])
+                if not status:
+                    time.sleep(self.republish_wait_time)
 
     def run(self):
         id_prod = self.marketplace.register_producer()
