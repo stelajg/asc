@@ -4,7 +4,7 @@ Computer Systems Architecture Course
 Assignment 1
 March 2021
 """
-
+import time
 from threading import Thread
 
 
@@ -36,24 +36,29 @@ class Consumer(Thread):
         self.retry_wait_time = retry_wait_time
         self.kwargs = kwargs
 
-    @staticmethod
-    def add_command(product, quantity):
-        print("i am in add", product, quantity)
-        pass
+    def add_command(self, id_cart, product, quantity):
+        status = False
+        for i in range(quantity):
+            while not status:
+                status = self.marketplace.add_to_cart(id_cart, product)
+                if not status:
+                    time.sleep(self.retry_wait_time)
+            status = False
 
-    @staticmethod
-    def remove_command(product, quantity):
-        print("i am in remove", product, quantity)
-        pass
+    def remove_command(self, id_cart, product, quantity):
+        for i in range(quantity):
+            self.marketplace.remove_from_cart(id_cart, product)
 
     def run(self):
-        # print(self.carts)
-        # print(self.kwargs)
-        for i in self.carts[0]:
-            command = i.get('type')
-            if command == 'add':
-                self.add_command(i.get('product'), i.get('quantity'))
-            else:
-                self.remove_command(i.get('product'), i.get('quantity'))
+        for carts in self.carts:
+            id_cart = self.marketplace.new_cart()
+            for i in carts:
+                command = i.get('type')
+                if command == 'add':
+                    self.add_command(id_cart, i.get('product'), i.get('quantity'))
+                else:
+                    self.remove_command(id_cart, i.get('product'), i.get('quantity'))
 
-
+            brought_products = self.marketplace.place_order(id_cart)
+            for i in range(len(brought_products)):
+                print(self.kwargs.get('name'), " brought ", brought_products[i])

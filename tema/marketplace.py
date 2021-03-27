@@ -24,7 +24,7 @@ class Marketplace:
         """
         self.queue_size_per_producer = queue_size_per_producer
         self.id_producer = -1
-        self.id_carts = 0
+        self.id_carts = -1
         self.producers_list = []
         self.market_contains = []
         self.carts_contains = []
@@ -68,6 +68,7 @@ class Marketplace:
         :returns an int representing the cart_id
         """
         self.id_carts += 1
+        self.carts_contains.append([])
         return self.id_carts
 
     def add_to_cart(self, cart_id, product):
@@ -82,14 +83,13 @@ class Marketplace:
 
         :returns True or False. If the caller receives False, it should wait and then try again
         """
-
         for lists in self.market_contains:
-            for sublist in lists:
-                for item in sublist:
-                    if item[0] is product and item[1] is True:
-                        self.carts_contains[cart_id].append(product)
-                        item[1] = False
-                        return True
+            for item in lists:
+                if item[0] is product and item[1] is True:
+                    self.carts_contains[cart_id].append(product)
+                    self.producers_list[self.market_contains.index(lists)] += 1
+                    item[1] = False
+                    return True
         return False
 
     def remove_from_cart(self, cart_id, product):
@@ -105,11 +105,10 @@ class Marketplace:
         """
         self.carts_contains[cart_id].remove(product)
         for lists in self.market_contains:
-            for sublist in lists:
-                for item in sublist:
-                    if item[0] is product and item[1] is False:
-                        self.carts_contains[cart_id].append(product)
-                        item[1] = True
+            for item in lists:
+                if item[0] is product and item[1] is False:
+                    self.producers_list[self.market_contains.index(lists)] -= 1
+                    item[1] = True
 
     def place_order(self, cart_id):
         """

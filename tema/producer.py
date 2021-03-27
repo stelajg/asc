@@ -5,7 +5,7 @@ Computer Systems Architecture Course
 Assignment 1
 March 2021
 """
-
+import time
 from threading import Thread
 
 
@@ -39,12 +39,11 @@ class Producer(Thread):
 
     def helper_run(self, producer_id, command_info):
         for i in range(command_info[1]):
-            print(command_info[0])
             self.marketplace.publish(producer_id, command_info[0], command_info[2])
-
+            time.sleep(self.republish_wait_time)
 
     def run(self):
-        id = self.marketplace.register_producer()
-        print(self.products)
-        for i in self.products:
-            self.helper_run(id, i)
+        id_prod = self.marketplace.register_producer()
+        while True:
+            for i in self.products:
+                self.helper_run(id_prod, i)
