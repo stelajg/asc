@@ -38,11 +38,11 @@ class Marketplace:
         """
         Returns an id for the producer that calls this.
         """
-        #self.lock_producers.acquire()
+        self.lock_producers.acquire()
         self.id_producer += 1
         self.market_contains.append([])
         self.producers_list.append(self.queue_size_per_producer)
-        #self.lock_producers.release()
+        self.lock_producers.release()
         return self.id_producer
 
     def publish(self, producer_id, product, wait_time):
@@ -59,11 +59,11 @@ class Marketplace:
         """
 
         if self.producers_list[producer_id] != 0:
-            #self.wait_condition_for_producing_prod.acquire()
+            self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
             self.consumersSemaphore.release()
-            #self.wait_condition_for_producing_prod.release()
+            self.wait_condition_for_producing_prod.release()
             time.sleep(wait_time)
             return True
         else:
@@ -97,9 +97,11 @@ class Marketplace:
         for lists in self.market_contains:
             for item in lists:
                 if item[0] is product and item[1] is True:
+                    self.lock_consumers.acquire()
                     self.carts_contains[cart_id].append(product)
                     self.producers_list[self.market_contains.index(lists)] += 1
                     item[1] = False
+                    self.lock_consumers.release()
                     return True
         return False
 
@@ -114,6 +116,7 @@ class Marketplace:
         :param product: the product to remove from cart
 
         """
+        self.lock_consumers.acquire()
         self.carts_contains[cart_id].remove(product)
         for lists in self.market_contains:
             for item in lists:
@@ -121,6 +124,7 @@ class Marketplace:
                     self.producers_list[self.market_contains.index(lists)] -= 1
                     item[1] = True
         self.consumersSemaphore.release()
+        self.lock_consumers.release()
 
     def place_order(self, cart_id):
         """
@@ -129,8 +133,11 @@ class Marketplace:
         :type cart_id: Int
         :param cart_id: id cart
         """
+        self.lock_consumers.acquire()
         self.number_of_orders_placed += 1
-        return self.carts_contains[cart_id]
+        return_list = self.carts_contains[cart_id]
+        self.lock_consumers.release()
+        return return_list
 
     def number_of_orders(self):
         self.lock_producers.acquire()

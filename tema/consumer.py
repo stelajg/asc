@@ -5,7 +5,9 @@ Assignment 1
 March 2021
 """
 import time
-from threading import Thread, Lock
+from threading import Thread, RLock
+
+lock = RLock()
 
 
 class Consumer(Thread):
@@ -35,6 +37,7 @@ class Consumer(Thread):
         self.marketplace = marketplace
         self.retry_wait_time = retry_wait_time
         self.kwargs = kwargs
+        self.lock = RLock()
 
     def add_command(self, id_cart, product, quantity):
         for i in range(quantity):
@@ -58,6 +61,8 @@ class Consumer(Thread):
                 else:
                     self.remove_command(id_cart, i.get('product'), i.get('quantity'))
 
+            lock.acquire()
             brought_products = self.marketplace.place_order(id_cart)
             for i in range(len(brought_products)):
                 print(self.kwargs.get('name'), "bought", brought_products[i])
+            lock.release()
