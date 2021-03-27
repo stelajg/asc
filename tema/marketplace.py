@@ -38,11 +38,11 @@ class Marketplace:
         """
         Returns an id for the producer that calls this.
         """
-        self.lock_producers.acquire()
+        #self.lock_producers.acquire()
         self.id_producer += 1
         self.market_contains.append([])
         self.producers_list.append(self.queue_size_per_producer)
-        self.lock_producers.release()
+        #self.lock_producers.release()
         return self.id_producer
 
     def publish(self, producer_id, product, wait_time):
@@ -59,11 +59,11 @@ class Marketplace:
         """
 
         if self.producers_list[producer_id] != 0:
-            self.wait_condition_for_producing_prod.acquire()
+            #self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
             self.consumersSemaphore.release()
-            self.wait_condition_for_producing_prod.release()
+            #self.wait_condition_for_producing_prod.release()
             time.sleep(wait_time)
             return True
         else:
@@ -133,6 +133,9 @@ class Marketplace:
         return self.carts_contains[cart_id]
 
     def number_of_orders(self):
+        self.lock_producers.acquire()
         if self.number_of_orders_placed == self.id_carts:
+            self.lock_producers.release()
             return False
+        self.lock_producers.release()
         return True

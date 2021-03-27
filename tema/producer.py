@@ -44,6 +44,8 @@ class Producer(Thread):
                 status = self.marketplace.publish(producer_id, command_info[0], command_info[2])
                 if not status:
                     time.sleep(self.republish_wait_time)
+                if not self.marketplace.number_of_orders():
+                    status = True
 
     def run(self):
         id_prod = self.marketplace.register_producer()
