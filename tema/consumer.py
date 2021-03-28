@@ -51,7 +51,7 @@ class Consumer(Thread):
         :type quantity: Int
         :param quantity: the quantity of the wanted product
         """
-        for i in range(quantity):
+        for _ in range(quantity):
             status = False
             while not status:
                 status = self.marketplace.add_to_cart(id_cart, product)
@@ -70,7 +70,7 @@ class Consumer(Thread):
         :type quantity: Int
         :param quantity: the quantity of the wanted product
         """
-        for i in range(quantity):
+        for _ in range(quantity):
             self.marketplace.remove_from_cart(id_cart, product)
 
     def run(self):

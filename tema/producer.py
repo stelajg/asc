@@ -48,7 +48,7 @@ class Producer(Thread):
         operations and the time needed to make the product
 
         """
-        for i in range(command_info[1]):
+        for _ in range(command_info[1]):
             status = False
             while not status:
                 status = self.marketplace.publish(producer_id, command_info[0], command_info[2])
