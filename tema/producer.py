@@ -38,6 +38,16 @@ class Producer(Thread):
         self.kwargs = kwargs
 
     def helper_run(self, producer_id, command_info):
+        """
+        publish the product
+        :type producer_id: Int
+        :param producer_id: the producer_id that will make the publishing
+
+        :type command_info: Tuple
+        :param command_info: contains the product, the number of publish
+        operations and the time needed to make the product
+
+        """
         for i in range(command_info[1]):
             status = False
             while not status:

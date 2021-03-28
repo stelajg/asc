@@ -40,6 +40,17 @@ class Consumer(Thread):
         self.lock = RLock()
 
     def add_command(self, id_cart, product, quantity):
+        """
+        Makes the add_command from consumer
+        :type id_cart: Int
+        :param id_cart: the id of the cart in what will be placed the order
+
+        :type product: Product
+        :param product: the product that is wanted
+
+        :type quantity: Int
+        :param quantity: the quantity of the wanted product
+        """
         for i in range(quantity):
             status = False
             while not status:
@@ -48,6 +59,17 @@ class Consumer(Thread):
                     time.sleep(self.retry_wait_time)
 
     def remove_command(self, id_cart, product, quantity):
+        """
+        Makes the remove command from consumer
+        :type id_cart: Int
+        :param id_cart: the id of the cart in what will be deleted the product
+
+        :type product: Product
+        :param product: the product that is wanted removed
+
+        :type quantity: Int
+        :param quantity: the quantity of the wanted product
+        """
         for i in range(quantity):
             self.marketplace.remove_from_cart(id_cart, product)
 
@@ -61,8 +83,4 @@ class Consumer(Thread):
                 else:
                     self.remove_command(id_cart, i.get('product'), i.get('quantity'))
 
-            lock.acquire()
-            brought_products = self.marketplace.place_order(id_cart)
-            for i in range(len(brought_products)):
-                print(self.kwargs.get('name'), "bought", brought_products[i])
-            lock.release()
+            self.marketplace.place_order(id_cart, self.kwargs.get('name'))

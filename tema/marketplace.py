@@ -28,7 +28,6 @@ class Marketplace:
         self.producers_list = []
         self.market_contains = []
         self.carts_contains = []
-        self.wait_condition_for_producing_prod = Condition()
         self.lock_producers = RLock()
         self.lock_consumers = RLock()
         self.number_of_orders_placed = -1
@@ -38,33 +37,33 @@ class Marketplace:
         """
         Returns an id for the producer that calls this.
         """
-        self.lock_producers.acquire()
-        self.id_producer += 1
         self.market_contains.append([])
         self.producers_list.append(self.queue_size_per_producer)
-        self.lock_producers.release()
-        return self.id_producer
+        with self.lock_producers:
+            self.id_producer += 1
+            return self.id_producer
 
-    def publish(self, producer_id, product, wait_time):
+    def publish(self, producer_id, product, wait_time_for_making_product):
         """
         Adds the product provided by the producer to the marketplace
 
-        :type producer_id: String
+        :type producer_id: Int
         :param producer_id: producer id
 
         :type product: Product
         :param product: the Product that will be published in the Marketplace
 
+        :type wait_time_for_making_product: Int
+        :param wait_time_for_making_product: the time need to make the product
+
         :returns True or False. If the caller receives False, it should wait and then try again.
         """
 
         if self.producers_list[producer_id] != 0:
-            self.wait_condition_for_producing_prod.acquire()
             self.market_contains[producer_id].append([product, True])
             self.producers_list[producer_id] -= 1
             self.consumersSemaphore.release()
-            self.wait_condition_for_producing_prod.release()
-            time.sleep(wait_time)
+            time.sleep(wait_time_for_making_product)
             return True
         else:
             return False
@@ -75,11 +74,10 @@ class Marketplace:
 
         :returns an int representing the cart_id
         """
-        self.lock_consumers.acquire()
-        self.id_carts += 1
-        self.carts_contains.append([])
-        self.lock_consumers.release()
-        return self.id_carts
+        with self.lock_consumers:
+            self.id_carts += 1
+            self.carts_contains.append([])
+            return self.id_carts
 
     def add_to_cart(self, cart_id, product):
         """
@@ -97,11 +95,10 @@ class Marketplace:
         for lists in self.market_contains:
             for item in lists:
                 if item[0] is product and item[1] is True:
-                    self.lock_consumers.acquire()
                     self.carts_contains[cart_id].append(product)
-                    self.producers_list[self.market_contains.index(lists)] += 1
-                    item[1] = False
-                    self.lock_consumers.release()
+                    with self.lock_consumers:
+                        self.producers_list[self.market_contains.index(lists)] += 1
+                        item[1] = False
                     return True
         return False
 
@@ -116,33 +113,38 @@ class Marketplace:
         :param product: the product to remove from cart
 
         """
-        self.lock_consumers.acquire()
         self.carts_contains[cart_id].remove(product)
         for lists in self.market_contains:
             for item in lists:
                 if item[0] is product and item[1] is False:
-                    self.producers_list[self.market_contains.index(lists)] -= 1
-                    item[1] = True
+                    with self.lock_consumers:
+                        self.producers_list[self.market_contains.index(lists)] -= 1
+                        item[1] = True
         self.consumersSemaphore.release()
-        self.lock_consumers.release()
 
-    def place_order(self, cart_id):
+    def place_order(self, cart_id, cons_name):
         """
         Return a list with all the products in the cart.
 
         :type cart_id: Int
         :param cart_id: id cart
+
+        :type cons_name: String
+        :param cons_name: Consumer name
         """
-        self.lock_consumers.acquire()
-        self.number_of_orders_placed += 1
-        return_list = self.carts_contains[cart_id]
-        self.lock_consumers.release()
-        return return_list
+        with self.lock_consumers:
+            self.number_of_orders_placed += 1
+            return_list = self.carts_contains[cart_id]
+            for i in range(len(return_list)):
+                print(cons_name, "bought", return_list[i])
+            return return_list
 
     def number_of_orders(self):
-        self.lock_producers.acquire()
-        if self.number_of_orders_placed == self.id_carts:
-            self.lock_producers.release()
-            return False
-        self.lock_producers.release()
-        return True
+        """
+        Return False if all the consumers placed their order
+        else return true
+        """
+        with self.lock_producers:
+            if self.number_of_orders_placed == self.id_carts:
+                return False
+            return True
